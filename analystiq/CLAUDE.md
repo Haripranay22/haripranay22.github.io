@@ -11,7 +11,9 @@ Not an AI engineer. An analyst who ships AI-powered data tools.
 
 ## Current Phase
 **PHASE 0 COMPLETE — Project Foundation**
-**PHASE 1 IN PROGRESS — Database Layer**
+**PHASE 1 COMPLETE — Database Layer**
+**PHASE 2 COMPLETE — LangGraph Agent Core**
+**PHASE 3 NEXT — FastAPI Backend**
 
 ## Stack & Why
 | Layer       | Tool              | Why                                              |
@@ -34,15 +36,22 @@ analystiq/
 ├── CLAUDE.md              ← This file. Update after every phase decision.
 ├── .env.example           ← Template for environment variables
 ├── requirements.txt       ← All dependencies, pinned versions
+├── run.py                 ← CLI test runner (use before UI is built)
 │
 ├── db/
-│   ├── schema.sql         ← Fintech PostgreSQL schema (transactions, accounts, customers)
+│   ├── schema.sql         ← Fintech PostgreSQL schema
 │   └── seed.py            ← Generates realistic synthetic fintech data
 │
-├── agent/                 ← Phase 2: LangGraph agent nodes live here
+├── agent/
+│   ├── state.py           ← AgentState TypedDict (the baton)
+│   ├── prompts.py         ← System prompts for each LLM node
+│   ├── nodes.py           ← 5 node functions (the workers)
+│   └── graph.py           ← LangGraph wiring (the map)
+│
 ├── api/                   ← Phase 3: FastAPI routes live here
 ├── ui/                    ← Phase 4: Streamlit app lives here
-└── tests/                 ← One test file per phase
+└── tests/
+    └── test_agent.py      ← Routing logic tests (no DB/OpenAI needed)
 ```
 
 ## Database: Fintech Schema
@@ -56,6 +65,10 @@ Tables we work with (mirrors real analyst work at State Street):
 - [Phase 0] Using local PostgreSQL, not cloud — keeps costs at zero during dev
 - [Phase 0] Using python-dotenv for env management
 - [Phase 0] gpt-4o-mini as default model
+- [Phase 2] MAX_RETRIES = 3 for self-correction loop
+- [Phase 2] Results stored as JSON string in state (handles Decimal/datetime via default=str)
+- [Phase 2] Module-level LLM and engine instances — avoid re-initializing on every node call
+- [Phase 2] Explainer receives only first 10 rows to keep token usage low
 
 ## What NOT to do
 - Do NOT hardcode API keys anywhere
